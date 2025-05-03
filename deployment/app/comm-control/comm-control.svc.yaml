@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: comm-control
+spec:
+  selector:
+    app: comm-control
+  ports:
+    - port: 80
+      targetPort: 8080

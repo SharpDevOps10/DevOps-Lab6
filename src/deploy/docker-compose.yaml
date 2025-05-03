@@ -1,0 +1,42 @@
+services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - hive-net-lab4
+
+  commcontrol:
+    image: devopslabsreg.azurecr.io/commcontrol:latest
+    container_name: commcontrol
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    networks:
+      - hive-net-lab4
+
+  hivemind:
+    image: devopslabsreg.azurecr.io/hivemind-api:latest
+    container_name: hivemind
+    ports:
+      - "5149:5149"
+    depends_on:
+      - commcontrol
+    networks:
+      - hive-net-lab4
+
+  mapclient:
+    image: devopslabsreg.azurecr.io/mapclient:latest
+    container_name: mapclient
+    ports:
+      - "3000:3000"
+    depends_on:
+      - commcontrol
+    networks:
+      - hive-net-lab4
+
+networks:
+  hive-net-lab4:
+    driver: bridge

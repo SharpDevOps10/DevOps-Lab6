@@ -1,0 +1,6 @@
+@DevOpsProject_HostAddress = http://hivemind:5134
+
+GET {{DevOpsProject_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
