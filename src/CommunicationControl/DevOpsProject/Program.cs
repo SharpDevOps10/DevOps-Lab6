@@ -61,7 +61,7 @@ internal class Program
         {
             c.SwaggerEndpoint($"{basePath}/swagger/v1/swagger.json", "CommunicationControl - V1");
             c.RoutePrefix = $"swagger";
-            
+
         });
         app.UseCors(corsPolicyName);
 
