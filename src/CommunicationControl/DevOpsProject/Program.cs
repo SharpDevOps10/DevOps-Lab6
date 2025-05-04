@@ -24,7 +24,7 @@ internal class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "CommunicationControl - V1", Version = "v1.0" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "CommunicationControl Main Branch", Version = "v1.0" });
         });
 
         // TODO: LATER - ADD OpenTelemtry
@@ -61,7 +61,7 @@ internal class Program
         {
             c.SwaggerEndpoint($"{basePath}/swagger/v1/swagger.json", "CommunicationControl - V1");
             c.RoutePrefix = $"swagger";
-
+            c.DocumentTitle = "Main Docs";
         });
         app.UseCors(corsPolicyName);
 
