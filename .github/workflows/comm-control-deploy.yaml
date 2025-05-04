@@ -32,16 +32,37 @@ jobs:
 
       - name: Build and Push Docker image to ACR
         run: |
-          az acr login --name ${{ secrets.ACR_NAME }}
-          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/commcontrol:${{ github.sha }} .
-          docker push ${{ secrets.ACR_NAME }}.azurecr.io/commcontrol:${{ github.sha }}
+          BRANCH_NAME=${{ github.head_ref || github.ref_name }}
+          ENV_TAG=$([[ "$BRANCH_NAME" == "main" ]] && echo "prod" || echo "dev")
+          IMAGE_TAG=$ENV_TAG-${GITHUB_SHA}
+          ACR_NAME=${{ secrets.ACR_NAME }}
+
+          az acr login --name $ACR_NAME
+
+          docker build -t $ACR_NAME.azurecr.io/commcontrol:$IMAGE_TAG .
+          docker push $ACR_NAME.azurecr.io/commcontrol:$IMAGE_TAG
+
+      - name: Set environment variables for AKS
+        run: |
+          BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
+          if [ "$BRANCH_NAME" = "main" ]; then
+            echo "AKS_RG=${{ secrets.AKS_RG }}" >> $GITHUB_ENV
+            echo "AKS_CLUSTER=${{ secrets.AKS_CLUSTER }}" >> $GITHUB_ENV
+          else
+            echo "AKS_RG=${{ secrets.AKS_RG_DEV }}" >> $GITHUB_ENV
+            echo "AKS_CLUSTER=${{ secrets.AKS_CLUSTER_DEV }}" >> $GITHUB_ENV
+          fi
 
       - name: Set up kubectl
         uses: azure/aks-set-context@v3
         with:
-          resource-group: ${{ secrets.AKS_RG }}
-          cluster-name: ${{ secrets.AKS_CLUSTER }}
+          resource-group: ${{ env.AKS_RG }}
+          cluster-name: ${{ env.AKS_CLUSTER }}
 
       - name: Deploy to AKS
         run: |
-          kubectl set image deployment/comm-control comm-control=${{ secrets.ACR_NAME }}.azurecr.io/commcontrol:${{ github.sha }} -n default
+          ENV_TAG=$([[ "${GITHUB_REF##*/}" == "main" ]] && echo "prod" || echo "dev")
+          IMAGE_TAG=$ENV_TAG-${GITHUB_SHA}
+          ACR_NAME=${{ secrets.ACR_NAME }}
+
+          kubectl set image deployment/comm-control comm-control=$ACR_NAME.azurecr.io/commcontrol:$IMAGE_TAG -n default
